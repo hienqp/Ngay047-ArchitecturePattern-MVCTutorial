@@ -10,7 +10,6 @@ __MVC (Model - View - Controller)__
 
 - ta sẽ thực hiện thiết kế 1 chương trình có giao diện như sau theo mô hình kiến trúc MVC
 
-<img src="https://github.com/hienqp/Ngay047-ArchitecturePattern-MVCTutorial/UI_SAMPLE.png">
-___
+<img src="https://github.com/hienqp/Ngay047-ArchitecturePattern-MVCTutorial/blob/main/UI_SAMPLE.png
 
 __XÂY DỰNG VIEW__
