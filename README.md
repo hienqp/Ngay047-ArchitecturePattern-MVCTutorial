@@ -1,4 +1,4 @@
-__MVC (Model - View - Controller)__
+# __MVC (Model - View - Controller)__
 
 - __MVC__ là viết tắt của 3 chữ: Model – View – Controller.
 
@@ -12,4 +12,180 @@ __MVC (Model - View - Controller)__
 
 <img src="https://github.com/hienqp/Ngay047-ArchitecturePattern-MVCTutorial/blob/main/UI_SAMPLE.png">
 
-__XÂY DỰNG VIEW__
+- với ứng dụng như hình trên, ta có hoạt động của ứng dụng như sau
+	- user nhập email, password, sau đó click Login
+	- chương trình sẽ xử lý với dữ liệu user nhập vào
+	- hiển thị message Login thành công hay thất bại cho user biết
+
+___
+
+## __XÂY DỰNG MODEL__
+
+- __Model__ chính là Instance của Object có các thuộc tính __email__ và __password__
+- __Model__ là nơi chứa data, xử lý data nhận được từ Controller
+- ta sẽ xây dựng 1 class Model có tên là User
+- __User.java__
+```java
+public class User {
+    private String email;
+    private String password;
+
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // kiểm tra chuỗi email có hợp lệ hay không
+    public boolean isValidEmail() {
+        return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    // kiểm tra chuỗi password có hợp lệ hay không
+    public boolean isValidPassword() {
+        return !TextUtils.isEmpty(password) && password.length() >= 6;
+    }
+}
+```
+
+___
+
+## __XÂY DỰNG VIEW__
+
+- với View chính là những thành phần hiển thị cho user nhìn thấy và tương tác, ở đây chính là file giao diện layout __activity_main.xml__
+- thiết kế Layout View __activity_main.xml__ như sau
+
+- __activity_main.xml__
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/login"
+        android:textColor="@color/black"
+        android:textSize="30sp" />
+
+    <EditText
+        android:id="@+id/edt_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:autofillHints="@string/email"
+        android:hint="@string/email"
+        android:inputType="textEmailAddress"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+
+    <EditText
+        android:id="@+id/edt_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:autofillHints="@string/password"
+        android:hint="@string/password"
+        android:inputType="numberPassword"
+        android:textColor="@color/black"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/successful_message_here"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="@string/login"
+        android:textSize="20sp" />
+
+</LinearLayout>
+```
+
+___
+
+## __XÂY DỰNG CONTROLLER__
+
+- Controller là thành phần sẽ lắng nghe các sự kiện user tương tác đến View, sau đó sẽ chuyển những yêu cầu đó đến Model
+- sau khi Model xử lý dữ liệu xong sẽ trả kết quả về cho Controller để cập nhật lên View hiển thị cho user
+- ở đây ta sẽ sử dụng __MainActivity.java__ làm Controller để lắng nghe sự kiện ở layout View __activity_main.xml__, sau đó gửi dữ liệu đó đến Model __User.java__, và nhận dữ liệu nhận được từ Model, đồng thời Controller cũng có những tác vụ logic của chính nó, sau đó cập nhật kết quả đến View cho người dùng
+
+- __MainActivity.java__
+```java
+public class MainActivity extends AppCompatActivity {
+    private EditText edtEmail, edtPassword;
+    private TextView tvMessage;
+    private Button btnLogin;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        edtEmail = (EditText) findViewById(R.id.edt_email);
+        edtPassword = (EditText) findViewById(R.id.edt_password);
+        tvMessage = (TextView) findViewById(R.id.tv_message);
+        btnLogin = (Button) findViewById(R.id.btn_login);
+
+        // lắng nghe sự kiện user click vào Button Login
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            // nếu user click vào Button Login, method clickLogin() sẽ được gọi
+            @Override
+            public void onClick(View v) {
+                clickLogin();
+            }
+        });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void clickLogin() {
+        // 2 biến tạm dùng để lưu giá trị của 2 EditText
+        String strEmail = edtEmail.getText().toString();
+        String strPassword = edtPassword.getText().toString();
+
+        // khởi tạo object model User
+        User user = new User(strEmail, strPassword);
+
+        // gọi đến các method kiểm tra của Model, để Controller có thể cập nhật dữ liệu của View
+        // thành phần được cập nhật trên View chính là TextView message đã được ẩn lúc khi xây dựng,
+        // lúc này tùy kết quả Model trả về là gì thì tvMessage sẽ hiển thị kết quả tương ứng
+        if (user.isValidEmail() && user.isValidPassword()) {
+            tvMessage.setText("Login Success");
+            tvMessage.setTextColor(getResources().getColor(R.color.purple_200, null));
+        } else {
+            tvMessage.setText("Email or Password Invalid");
+            tvMessage.setTextColor(getResources().getColor(R.color.purple_700, null));
+        }
+        tvMessage.setVisibility(View.VISIBLE);
+    }
+}
+```

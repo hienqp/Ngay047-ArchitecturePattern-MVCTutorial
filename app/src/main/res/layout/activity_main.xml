@@ -43,9 +43,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="@string/successful_message_here"
-        android:textSize="18sp"/>
-<!--        android:visibility="gone" -->
-
+        android:textSize="18sp"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_login"
